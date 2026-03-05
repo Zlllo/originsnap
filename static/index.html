@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Originsnap — AI 图片溯源</title>
+    <meta name="description" content="Originsnap：AI 驱动的反向图片搜索工具，聚合多搜索引擎，帮你找到图片的最初来源和原作者。">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📸</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">📸</div>
+                <h1>Originsnap</h1>
+            </div>
+            <p>上传图片，AI 帮你追溯最初来源与原作者</p>
+        </header>
+
+        <!-- Upload Area -->
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-prompt" id="uploadPrompt">
+                <span class="upload-icon">🖼️</span>
+                <div class="upload-text">
+                    <h3>拖拽图片到这里，或点击上传</h3>
+                    <p>支持 JPG、PNG、WebP 格式</p>
+                    <p class="hint">💡 也可以直接 Ctrl+V 粘贴图片</p>
+                </div>
+            </div>
+            <div class="preview-container" id="previewContainer">
+                <img class="preview-image" id="previewImage" alt="Preview">
+                <button class="remove-btn" id="removeBtn" title="移除图片">✕</button>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" hidden>
+        </div>
+
+        <!-- Search Button -->
+        <button class="search-btn" id="searchBtn">
+            🔍 开始溯源搜索
+        </button>
+
+        <!-- Loading -->
+        <div class="loading-section" id="loadingSection">
+            <div class="loading-card">
+                <div class="loading-spinner"></div>
+                <div class="loading-text" id="loadingText">正在搜索中，请稍候...</div>
+                <div class="engine-status" id="engineStatus">
+                    <span class="engine-badge searching">SauceNAO</span>
+                    <span class="engine-badge searching">IQDB</span>
+                    <span class="engine-badge searching">ASCII2D</span>
+                    <span class="engine-badge searching">trace.moe</span>
+                    <span class="engine-badge searching">AI 分析</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="results-section" id="resultsSection"></div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
