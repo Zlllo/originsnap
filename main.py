@@ -44,20 +44,21 @@ async def search_image(file: UploadFile = File(...)):
     llm_base_url = os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
     llm_model = os.getenv("LLM_MODEL", "gpt-4o-mini")
 
-    # Run all search engines concurrently
+    # Run all search engines + external links upload concurrently
     engine_tasks = [
         saucenao.search(image_data, api_key=saucenao_key if saucenao_key else None),
         iqdb.search(image_data),
         ascii2d.search(image_data),
         tracemoe.search(image_data),
+        links.generate_links(image_data),
     ]
 
-    search_results = await asyncio.gather(*engine_tasks, return_exceptions=True)
+    all_results = await asyncio.gather(*engine_tasks, return_exceptions=True)
 
-    # Process results, converting exceptions to error dicts
+    # Process search results (first 4), converting exceptions to error dicts
     processed_results = []
     engine_names = ["SauceNAO", "IQDB", "ASCII2D", "trace.moe"]
-    for i, result in enumerate(search_results):
+    for i, result in enumerate(all_results[:4]):
         if isinstance(result, Exception):
             processed_results.append({
                 "engine": engine_names[i],
@@ -67,8 +68,10 @@ async def search_image(file: UploadFile = File(...)):
         else:
             processed_results.append(result)
 
-    # Generate external search links
-    external_links = links.generate_links(image_data)
+    # External links (5th result)
+    external_links = all_results[4] if not isinstance(all_results[4], Exception) else {
+        "engine": "external_links", "links": [], "error": str(all_results[4])
+    }
 
     # AI analysis
     ai_result = await analyze(

@@ -181,8 +181,11 @@ function renderResults(data) {
         html += renderEngineResults(eng);
     }
 
-    // External search buttons (form-POST to engines)
-    html += renderExternalSearchButtons();
+    // External links (Google Lens, Yandex, TinEye with image URL)
+    const extLinks = data.external_links;
+    if (extLinks?.links?.length) {
+        html += renderExternalLinks(extLinks.links);
+    }
 
     resultsSection.innerHTML = html;
     resultsSection.classList.add('active');
@@ -334,73 +337,21 @@ function renderResultItem(r, engine) {
     </div>`;
 }
 
-function renderExternalSearchButtons() {
-    const engines = [
-        { id: 'google', icon: '🔍', name: 'Google Lens', desc: '通用图片搜索' },
-        { id: 'yandex', icon: '🔎', name: 'Yandex', desc: '俄系资源强' },
-        { id: 'tineye', icon: '👁️', name: 'TinEye', desc: '按时间排序溯源' },
-    ];
-    const items = engines.map((e) => `
-        <button class="ext-link" onclick="searchExternal('${e.id}')">
-            <span class="icon">${e.icon}</span>
+function renderExternalLinks(links) {
+    const items = links.map((l) => `
+        <a href="${escapeHtml(l.url)}" class="ext-link" target="_blank" rel="noopener">
+            <span class="icon">${l.icon || '🔗'}</span>
             <div>
-                <div class="name">${e.name}</div>
-                <div class="desc">${e.desc}</div>
+                <div class="name">${escapeHtml(l.engine)}</div>
+                <div class="desc">${escapeHtml(l.description || '')}</div>
             </div>
-        </button>`).join('');
+        </a>`).join('');
 
     return `
     <div class="external-links">
-        <h3>🌐 在其他引擎中搜索（点击自动上传图片）</h3>
+        <h3>🌐 在其他引擎中搜索（点击直接带图搜索）</h3>
         <div class="links-grid">${items}</div>
     </div>`;
-}
-
-function searchExternal(engine) {
-    if (!selectedFile) return;
-
-    const configs = {
-        google: {
-            url: 'https://lens.google.com/v3/upload',
-            fieldName: 'encoded_image',
-            method: 'POST',
-        },
-        yandex: {
-            url: 'https://yandex.com/images/search?rpt=imageview&format=json',
-            fieldName: 'upfile',
-            method: 'POST',
-        },
-        tineye: {
-            url: 'https://tineye.com/search',
-            fieldName: 'image',
-            method: 'POST',
-        },
-    };
-
-    const cfg = configs[engine];
-    if (!cfg) return;
-
-    // Create hidden form and submit to new tab
-    const form = document.createElement('form');
-    form.method = cfg.method;
-    form.action = cfg.url;
-    form.target = '_blank';
-    form.enctype = 'multipart/form-data';
-    form.style.display = 'none';
-
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.name = cfg.fieldName;
-
-    // We need to use DataTransfer to create a proper FileList
-    const dt = new DataTransfer();
-    dt.items.add(selectedFile);
-    fileInput.files = dt.files;
-
-    form.appendChild(fileInput);
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
 }
 
 // ===== Utilities =====
